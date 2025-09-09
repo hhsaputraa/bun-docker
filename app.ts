@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 import { handleRoutes } from './src/routes';
 import { logRequest, logError } from './src/utils/logger';
+import { response } from './src/utils/responseHelper';
 
 // Load environment variables
 config();
@@ -40,21 +41,19 @@ const server = Bun.serve({
       logError(error as Error, req, { location: 'server.fetch' });
       
       // Return error response with CORS headers
-      const errorResponse = new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
+      const failResponse = response.fail('Internal server error', 500);
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        failResponse.headers.set(key, value);
       });
-      
+
       // Log error response
       logRequest(req, 500, startTime);
-      
-      return errorResponse;
+
+      return failResponse;
     }
   },
 });
 
 console.log(`[${NODE_ENV}] Server running at http://localhost:${server.port}`);
 console.log(`API endpoints available at http://localhost:${server.port}/api/tasks`);
+

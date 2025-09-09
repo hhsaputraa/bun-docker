@@ -1,6 +1,6 @@
 import { handleTaskRoutes } from './taskRoutes';
-import { errorResponse } from '../utils/routeUtils';
 import { logError } from '../utils/logger';
+import { response } from '../utils/responseHelper';
 
 export async function handleRoutes(req: Request): Promise<Response> {
   try {
@@ -32,7 +32,7 @@ export async function handleRoutes(req: Request): Promise<Response> {
         // if (otherResponse) return otherResponse;
 
         // No matching API route found
-        return errorResponse('Endpoint not found', 404);
+        return response.notFound('Endpoint not found');
       } catch (routeError) {
         // Log specific API route errors with path information
         logError(routeError as Error, req, { 
@@ -44,10 +44,10 @@ export async function handleRoutes(req: Request): Promise<Response> {
     }
 
     // No matching route found
-    return errorResponse('Not found', 404);
+    return response.notFound('Not found');
   } catch (error) {
     // Log unhandled errors
     logError(error as Error, req, { location: 'handleRoutes' });
-    return errorResponse('Internal server error', 500);
+    return response.fail('Internal server error', 500);
   }
 }

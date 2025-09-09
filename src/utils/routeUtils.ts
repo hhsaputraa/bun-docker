@@ -44,19 +44,6 @@ export function matchRoute(url: string, pattern: string): boolean {
       return false;
     }
   }
-  
+
   return true;
-}
-
-// Create a JSON response
-export function jsonResponse(data: any, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
-
-// Create an error response
-export function errorResponse(message: string, status = 500): Response {
-  return jsonResponse({ success: false, error: message }, status);
 }
