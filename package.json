@@ -1,0 +1,15 @@
+{
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "bun app.ts",
+    "dev": "bun --hot app.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.2",
+    "dotenv": "^17.2.2"
+  }
+}
