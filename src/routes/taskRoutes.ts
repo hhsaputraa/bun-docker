@@ -2,97 +2,66 @@ import { TaskController } from '../controllers/taskController';
 import { extractPathParams, matchRoute } from '../utils/routeUtils';
 import { logError } from '../utils/logger';
 
-export async function handleTaskRoutes(req: Request): Promise<Response | null> {
-  const url = new URL(req.url);
+interface RouteConfig {
+  method: string;
+  path: string;
+  handler: (req: Request, params: Record<string, string>) => Promise<Response>;
+  location: string;
+}
+
+const routes: RouteConfig[] = [
+  {
+    method: 'GET',
+    path: '/api/tasks',
+    handler: (req, _params) => TaskController.getAllTasks(req),
+    location: 'TaskController.getAllTasks',
+  },
+  {
+    method: 'POST',
+    path: '/api/tasks',
+    handler: (req, _params) => TaskController.createTask(req),
+    location: 'TaskController.createTask',
+  },
+  {
+    method: 'GET',
+    path: '/api/tasks/:id',
+    handler: (req, params) => TaskController.getTaskById(req, params.id),
+    location: 'TaskController.getTaskById',
+  },
+  {
+    method: 'PUT',
+    path: '/api/tasks/:id',
+    handler: (req, params) => TaskController.updateTask(req, params.id),
+    location: 'TaskController.updateTask',
+  },
+  {
+    method: 'DELETE',
+    path: '/api/tasks/:id',
+    handler: (req, params) => TaskController.deleteTask(req, params.id),
+    location: 'TaskController.deleteTask',
+  },
+];
+
+export async function handleTaskRoutes(req: Request, url: URL): Promise<Response | null> {
   const path = url.pathname;
   const method = req.method;
 
-  try {
-    // GET /api/tasks - Get all tasks
-    if (path === '/api/tasks' && method === 'GET') {
+  for (const route of routes) {
+    if (method === route.method && matchRoute(path, route.path)) {
+      const params = extractPathParams(path, route.path) ?? {};
       try {
-        return await TaskController.getAllTasks(req);
+        return await route.handler(req, params);
       } catch (error) {
-        logError(error as Error, req, { 
-          location: 'TaskController.getAllTasks', 
-          route: 'GET /api/tasks' 
+        logError(error as Error, req, {
+          location: route.location,
+          route: `${method} ${route.path}`,
+          ...(params.id && { taskId: params.id }),
         });
         throw error;
       }
     }
-
-    // POST /api/tasks - Create a new task
-    if (path === '/api/tasks' && method === 'POST') {
-      try {
-        return await TaskController.createTask(req);
-      } catch (error) {
-        logError(error as Error, req, { 
-          location: 'TaskController.createTask', 
-          route: 'POST /api/tasks' 
-        });
-        throw error;
-      }
-    }
-
-    // GET /api/tasks/:id - Get task by ID
-    if (matchRoute(path, '/api/tasks/:id') && method === 'GET') {
-      const params = extractPathParams(path, '/api/tasks/:id');
-      if (params && params.id) {
-        try {
-          return await TaskController.getTaskById(req, params.id);
-        } catch (error) {
-          logError(error as Error, req, { 
-            location: 'TaskController.getTaskById', 
-            route: `GET /api/tasks/${params.id}`,
-            taskId: params.id
-          });
-          throw error;
-        }
-      }
-    }
-
-    // PUT /api/tasks/:id - Update task
-    if (matchRoute(path, '/api/tasks/:id') && method === 'PUT') {
-      const params = extractPathParams(path, '/api/tasks/:id');
-      if (params && params.id) {
-        try {
-          return await TaskController.updateTask(req, params.id);
-        } catch (error) {
-          logError(error as Error, req, { 
-            location: 'TaskController.updateTask', 
-            route: `PUT /api/tasks/${params.id}`,
-            taskId: params.id
-          });
-          throw error;
-        }
-      }
-    }
-
-    // DELETE /api/tasks/:id - Delete task
-    if (matchRoute(path, '/api/tasks/:id') && method === 'DELETE') {
-      const params = extractPathParams(path, '/api/tasks/:id');
-      if (params && params.id) {
-        try {
-          return await TaskController.deleteTask(req, params.id);
-        } catch (error) {
-          logError(error as Error, req, { 
-            location: 'TaskController.deleteTask', 
-            route: `DELETE /api/tasks/${params.id}`,
-            taskId: params.id
-          });
-          throw error;
-        }
-      }
-    }
-
-    // No matching route found
-    return null;
-  } catch (routeError) {
-    logError(routeError as Error, req, { 
-      location: 'handleTaskRoutes', 
-      path, 
-      method 
-    });
-    throw routeError;
   }
+
+  return null;
 }
+

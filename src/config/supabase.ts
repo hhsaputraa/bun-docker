@@ -50,7 +50,8 @@ if (isDevelopment) {
   try {
     supabaseClient = createClient(supabaseUrl, supabaseKey);
   } catch (error) {
-    throw new Error(`Failed to initialize Supabase client: ${error.message}`);
+    const err = error as Error;
+    throw new Error(`Failed to initialize Supabase client: ${err.message}`);
   }
 }
 
