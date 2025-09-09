@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase';
 import { Task, CreateTaskPayload, UpdateTaskPayload } from '../models/types';
+import { logInfo } from '../utils/logger';
 
 const TABLE_NAME = 'tasks';
 
@@ -22,17 +23,17 @@ let mockTasks: Task[] = [
 ];
 
 // Gunakan Supabase untuk operasi CRUD
-const useMockData = false;
+const useMockData = process.env.USE_MOCK_DATA === 'true';
 
 export const TaskService = {
   // Get all tasks
   async getAllTasks(): Promise<Task[]> {
     if (useMockData) {
-      console.log('🔄 Using mock data for getAllTasks');
+      logInfo('Using mock data for getAllTasks');
       return [...mockTasks];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from(TABLE_NAME)
       .select('*')
       .order('created_at', { ascending: false });
@@ -44,12 +45,12 @@ export const TaskService = {
   // Get task by ID
   async getTaskById(id: string): Promise<Task | null> {
     if (useMockData) {
-      console.log(`🔄 Using mock data for getTaskById: ${id}`);
+      logInfo('Using mock data for getTaskById', { id });
       const task = mockTasks.find(t => t.id === id);
       return task || null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from(TABLE_NAME)
       .select('*')
       .eq('id', id)
@@ -62,7 +63,7 @@ export const TaskService = {
   // Create a new task
   async createTask(task: CreateTaskPayload): Promise<Task> {
     if (useMockData) {
-      console.log('🔄 Using mock data for createTask');
+      logInfo('Using mock data for createTask');
       const newTask: Task = {
         id: (mockTasks.length + 1).toString(),
         title: task.title,
@@ -74,7 +75,7 @@ export const TaskService = {
       return newTask;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from(TABLE_NAME)
       .insert([task])
       .select()
@@ -87,7 +88,7 @@ export const TaskService = {
   // Update an existing task
   async updateTask(id: string, updates: UpdateTaskPayload): Promise<Task> {
     if (useMockData) {
-      console.log(`🔄 Using mock data for updateTask: ${id}`);
+      logInfo('Using mock data for updateTask', { id });
       const index = mockTasks.findIndex(t => t.id === id);
       if (index === -1) throw new Error('Task not found');
       
@@ -100,7 +101,7 @@ export const TaskService = {
       return mockTasks[index];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from(TABLE_NAME)
       .update(updates)
       .eq('id', id)
@@ -114,14 +115,14 @@ export const TaskService = {
   // Delete a task
   async deleteTask(id: string): Promise<void> {
     if (useMockData) {
-      console.log(`🔄 Using mock data for deleteTask: ${id}`);
+      logInfo('Using mock data for deleteTask', { id });
       const index = mockTasks.findIndex(t => t.id === id);
       if (index === -1) throw new Error('Task not found');
       mockTasks.splice(index, 1);
       return;
     }
     
-    const { error } = await supabase
+    const { error } = await supabase!
       .from(TABLE_NAME)
       .delete()
       .eq('id', id);

@@ -24,7 +24,7 @@ export async function handleRoutes(req: Request): Promise<Response> {
     if (path.startsWith('/api/')) {
       try {
         // Task routes
-        const taskResponse = await handleTaskRoutes(req);
+        const taskResponse = await handleTaskRoutes(req, url);
         if (taskResponse) return taskResponse;
 
         // Add other route handlers here as needed

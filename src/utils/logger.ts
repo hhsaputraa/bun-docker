@@ -110,3 +110,10 @@ export function logError(error: Error, req?: Request, additionalInfo?: Record<st
   console.error(formatLog('error', logData));
   console.error(formatErrorDetails(error));
 }
+
+/**
+ * Log informational messages
+ */
+export function logInfo(message: string, additionalInfo?: Record<string, any>): void {
+  console.log(formatLog('info', { message, ...additionalInfo }));
+}

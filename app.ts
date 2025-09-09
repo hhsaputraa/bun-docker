@@ -25,31 +25,31 @@ const server = Bun.serve({
     
     try {
       // Handle routes
-      const response = await handleRoutes(req);
-      
+      const apiResponse = await handleRoutes(req);
+
       // Add CORS headers to the response
       Object.entries(corsHeaders).forEach(([key, value]) => {
-        response.headers.set(key, value);
+        apiResponse.headers.set(key, value);
       });
-      
+
       // Log successful request
-      logRequest(req, response.status, startTime);
-      
-      return response;
+      logRequest(req, apiResponse.status, startTime);
+
+      return apiResponse;
     } catch (error) {
       // Log error with details
       logError(error as Error, req, { location: 'server.fetch' });
       
       // Return error response with CORS headers
-      const failResponse = response.fail('Internal server error', 500);
+      const errorResponse = response.fail('Internal server error', 500);
       Object.entries(corsHeaders).forEach(([key, value]) => {
-        failResponse.headers.set(key, value);
+        errorResponse.headers.set(key, value);
       });
 
       // Log error response
       logRequest(req, 500, startTime);
 
-      return failResponse;
+      return errorResponse;
     }
   },
 });
