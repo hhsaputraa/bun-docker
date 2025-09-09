@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 import { handleRoutes } from './src/routes';
 import { logRequest, logError } from './src/utils/logger';
+import { buildCorsHeaders } from './src/utils/cors';
 
 // Load environment variables
 config();
@@ -13,11 +14,7 @@ const server = Bun.serve({
   port: PORT,
   async fetch(req) {
     // Add CORS headers to all responses
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    };
+    const corsHeaders = buildCorsHeaders();
     
     // Record start time for response time calculation
     const startTime = Date.now();

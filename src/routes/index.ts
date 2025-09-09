@@ -1,6 +1,7 @@
 import { handleTaskRoutes } from './taskRoutes';
 import { errorResponse } from '../utils/routeUtils';
 import { logError } from '../utils/logger';
+import { buildCorsHeaders } from '../utils/cors';
 
 export async function handleRoutes(req: Request): Promise<Response> {
   try {
@@ -8,11 +9,7 @@ export async function handleRoutes(req: Request): Promise<Response> {
     if (req.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
+        headers: buildCorsHeaders(),
       });
     }
 
